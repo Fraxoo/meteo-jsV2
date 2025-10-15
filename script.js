@@ -41,32 +41,16 @@ async function main() {
     }
 
 
-    function showCurrentMeteo(meteo, town) {
-        const type = "current"
-
-        const weather = convertInfoToConst(meteo, type);
-
-        console.log(weather);
-
-        const mainTop = document.querySelector(".main-top")
-        const topH1 = mainTop.querySelector("h1").textContent = town.address.city;
-
-        const rainChances = mainTop.querySelector("p").textContent = `Chance de pluie: ${meteo.daily.precipitation_probability_max[0]}`;
-
-        const temp = mainTop.querySelector("h2").textContent = meteo.current.temperature_2m;
-
-        const img = mainTop.querySelector("img").setAttribute("src", convertMeteoToAsset({
-            isDay_bool: weather.isDay,
-            "meteoCloud_number": weather.meteoCloud,
-            "meteoRain_number": weather.meteoRain,
-            "meteoSnow": weather.meteoSnow
-        }));
 
 
+}
 
-    }
+main();
 
-
+/**
+ * 
+ * @param {object} meteo //result of fetch function
+ */
     function showForecastMid(meteo) {
         const type = "hourly";
         const weather = convertInfoToConst(meteo, type);
@@ -95,9 +79,32 @@ async function main() {
 
     }
 
-}
+/**
+ * 
+ * @param {object} meteo //result of fetch function
+ * @param {string} town 
+ */
+    function showCurrentMeteo(meteo, town) {
+        const type = "current"
 
-main();
+        const weather = convertInfoToConst(meteo, type);
+
+        console.log(weather);
+
+        const mainTop = document.querySelector(".main-top")
+        const topH1 = mainTop.querySelector("h1").textContent = town.address.city;
+
+        const rainChances = mainTop.querySelector("p").textContent = `Chance de pluie: ${meteo.daily.precipitation_probability_max[0]}`;
+
+        const temp = mainTop.querySelector("h2").textContent = meteo.current.temperature_2m;
+
+        const img = mainTop.querySelector("img").setAttribute("src", convertMeteoToAsset({
+            isDay_bool: weather.isDay,
+            "meteoCloud_number": weather.meteoCloud,
+            "meteoRain_number": weather.meteoRain,
+            "meteoSnow": weather.meteoSnow
+        }));
+    }
 
 
 /**
@@ -136,6 +143,7 @@ function convertMeteoToAsset(option = { isDay_bool: 1, meteoRain_number: 0, mete
 
 
 /**
+ * @param {object} meteo //result of fetch function 
  * @param {string} type //type of data
  */
 function convertInfoToConst(meteo, type) {
