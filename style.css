@@ -1,4 +1,41 @@
-*{
+* {
     padding: 0;
     margin: 0;
+    font-family: 'Poppins', 'Inter', 'SF Pro Display', sans-serif;
+
+}
+
+body {
+    background-color: #0b121e;
+    height: 100vh;
+}
+
+p {
+    color: #b7bcc4;
+}
+
+.search-bar {
+    background-color: #1c2939;
+    color: #b7bcc4;
+    margin: 2rem 1rem;
+    padding: 0.5rem;
+    border-radius: 5rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.search-bar i{
+    margin: 0.5rem;
+}
+
+#search{
+    background-color: #1c2939;
+    color: #b7bcc4;
+    border: none;
+    width: 90%;
+    border-radius: 1rem;
+}
+
+#search:focus{
+    outline: none;
 }
