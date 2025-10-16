@@ -31,7 +31,7 @@ async function main() {
             const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${town}&count=1&language=fr&format=json`).then(response => response.json());
 
             console.log(response);
-            
+
 
             if (response.results.length > 0) {
 
@@ -59,7 +59,7 @@ async function main() {
                 const meteo = await getWeather(position.coords.longitude, position.coords.latitude);
 
                 console.log(meteo);
-                
+
 
                 showHourlyMeteo(meteo.meteo);
                 showCurrentMeteo(meteo.meteo, meteo.town.address.city);
@@ -77,7 +77,7 @@ async function main() {
     window.addEventListener("load", () => {
         const searchInput = document.querySelector("#search");
         if (searchInput) {
-            searchInput.value = ""; 
+            searchInput.value = "";
         }
     });
 
