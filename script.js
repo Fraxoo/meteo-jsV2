@@ -2,7 +2,7 @@ async function main() {
 
     async function getWeather(longitude, latitude) {
         try {
-            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,weather_code,sunrise,sunset,daylight_duration,rain_sum,snowfall_sum,wind_speed_10m_max,precipitation_probability_max&hourly=temperature_2m,is_day,rain,snowfall,apparent_temperature,precipitation_probability,cloud_cover&current=temperature_2m,rain,is_day,apparent_temperature,snowfall,cloud_cover,wind_speed_10m&timezone=Europe%2FLondon&forecast_hours=24`)
+            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,weather_code,sunrise,sunset,daylight_duration,rain_sum,snowfall_sum,wind_speed_10m_max,precipitation_probability_max,cloud_cover_mean,cloud_cover_max&hourly=temperature_2m,is_day,rain,snowfall,apparent_temperature,precipitation_probability,cloud_cover&current=temperature_2m,rain,is_day,apparent_temperature,snowfall,cloud_cover,wind_speed_10m&timezone=Europe%2FLondon&forecast_hours=24`)
             const respons = await fetch(`http://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`);
 
 
@@ -34,77 +34,130 @@ async function main() {
             console.log(meteo);
 
 
-            showForecastMid(meteo.meteo);
+            showHourlyMeteo(meteo.meteo);
             showCurrentMeteo(meteo.meteo, meteo.town)
+            showDailyMeteo(meteo.meteo);
         })
 
-    }
+    } else {
 
 
-
+    } // ajouter ville par defaut (paris)
+    const coordsBytown = await getCoordsByTown("paris");
+    console.log(coordsBytown.results);
 
 }
 
 main();
 
+
+
+function showDailyMeteo(meteo) {
+    const type = "daily"
+    const weather = convertInfoToConst(meteo, type);
+    const bottomMainDiv = document.querySelector(".bottom-main");
+    // const jour = date.toLocaleDateString("fr-FR", { weekday: "long" });
+    // console.log(jour); // "mardi"
+
+
+    for (let i = 0; i < meteo.daily.time.length; i++) {
+        const bottomMainTemplate = document.querySelector("#bottom-main");
+        const clone = bottomMainTemplate.content.cloneNode(true);
+        const dateString = weather.meteoHour[i];
+        const date = new Date(dateString);
+        const day = date.toLocaleDateString("fr-FR", { weekday: "long" });
+
+        const day_elem = clone.querySelector(".day").textContent =
+            day.charAt(0).toUpperCase() + day.slice(1);
+
+
+        const img = clone.querySelector("img").setAttribute("src", convertMeteoToAsset({
+            isDay_bool: 1,
+            "meteoCloud_number": weather.meteoDailyCloud[i],
+            "meteoRain_number": weather.meteoDailyRain[i],
+            "meteoSnow": weather.meteoDailysnow[i]
+        }));
+
+        const bottomMainInfoTemp = clone.querySelector(".bottom-main-info-temp");
+        const maxTemp = bottomMainInfoTemp.querySelector("h3").textContent = `${Math.round(weather.meteoMaxTemp[i])}°`;
+        const minTemp = bottomMainInfoTemp.querySelector(".min-temp").textContent = `${Math.round(weather.meteoMinTemp[i])}°`;
+
+        bottomMainDiv.appendChild(clone);
+    }
+}
+
+
+
 /**
- * 
+ * affiche la meteo actuel a l'emplacement choisi et les info comme la vitesse du vent etc
  * @param {object} meteo //result of fetch function
  */
-    function showForecastMid(meteo) {
-        const type = "hourly";
-        const weather = convertInfoToConst(meteo, type);
+function showHourlyMeteo(meteo) {
+    const type = "hourly";
+    const weather = convertInfoToConst(meteo, type);
 
-        const forecastMidDiv = document.querySelector(".forecast-mid");
-        for (let i = 0; i < meteo.hourly.time.length; i++) {
+    const forecastMidDiv = document.querySelector(".forecast-mid");
+    for (let i = 0; i < meteo.hourly.time.length; i++) {
 
-            const forecastMidTemplate = document.querySelector("#forecast-mid")
-            const clone = forecastMidTemplate.content.cloneNode(true);
+        const forecastMidTemplate = document.querySelector("#forecast-mid")
+        const clone = forecastMidTemplate.content.cloneNode(true);
 
-            const hour = clone.querySelector("p").textContent = weather.meteoHour[i].split("T")[1];
+        const hour = clone.querySelector("p").textContent = weather.meteoHour[i].split("T")[1];
 
-            const temp = clone.querySelector("h3").textContent = `${weather.meteoTemp[i]}°`;
-            const img = clone.querySelector("img");
+        const temp = clone.querySelector("h3").textContent = `${weather.meteoTemp[i]}°`;
+        const img = clone.querySelector("img");
 
-            img.setAttribute("src", convertMeteoToAsset({
-                isDay_bool: weather.isDay[i],
-                "meteoCloud_number": weather.meteoCloud[i],
-                "meteoRain_number": weather.meteoRain[i],
-                "meteoSnow": weather.meteoSnow[i]
-            }))
+        img.setAttribute("src", convertMeteoToAsset({
+            isDay_bool: weather.isDay[i],
+            "meteoCloud_number": weather.meteoCloud[i],
+            "meteoRain_number": weather.meteoRain[i],
+            "meteoSnow": weather.meteoSnow[i]
+        }))
 
-            forecastMidDiv.appendChild(clone)
+        forecastMidDiv.appendChild(clone);
 
-        }
 
     }
+
+}
+
+
 
 /**
  * 
  * @param {object} meteo //result of fetch function
  * @param {string} town 
  */
-    function showCurrentMeteo(meteo, town) {
-        const type = "current"
+function showCurrentMeteo(meteo, town) {
+    const type = "current"
 
-        const weather = convertInfoToConst(meteo, type);
+    const weather = convertInfoToConst(meteo, type);
 
-        console.log(weather);
+    const mainTop = document.querySelector(".main-top")
+    const topH1 = mainTop.querySelector("h1").textContent = town.address.city;
 
-        const mainTop = document.querySelector(".main-top")
-        const topH1 = mainTop.querySelector("h1").textContent = town.address.city;
+    const rainChances = mainTop.querySelector("p").textContent = `Chance de pluie: ${meteo.daily.precipitation_probability_max[0]}%`;
 
-        const rainChances = mainTop.querySelector("p").textContent = `Chance de pluie: ${meteo.daily.precipitation_probability_max[0]}`;
+    const temp = mainTop.querySelector("h2").textContent = `${meteo.current.temperature_2m}°`;
 
-        const temp = mainTop.querySelector("h2").textContent = meteo.current.temperature_2m;
+    const img = mainTop.querySelector("img").setAttribute("src", convertMeteoToAsset({
+        isDay_bool: weather.isDay,
+        "meteoCloud_number": weather.meteoCloud,
+        "meteoRain_number": weather.meteoRain,
+        "meteoSnow": weather.meteoSnow
+    }));
 
-        const img = mainTop.querySelector("img").setAttribute("src", convertMeteoToAsset({
-            isDay_bool: weather.isDay,
-            "meteoCloud_number": weather.meteoCloud,
-            "meteoRain_number": weather.meteoRain,
-            "meteoSnow": weather.meteoSnow
-        }));
-    }
+    console.log(weather);
+
+
+    const midInfo = document.querySelector(".mid-info");
+
+    const realFeel = midInfo.querySelector(".real-feel").querySelector("h3").textContent = `${weather.meteoApparentTemp}°`;
+
+    const wind = midInfo.querySelector(".wind").querySelector("h3").textContent = `${weather.meteoWind} km/h`;
+}
+
+
 
 
 /**
@@ -115,16 +168,16 @@ main();
  * @param {1|0} isDay 
  * @returns 
  */
-function convertMeteoToAsset(option = { isDay_bool: 1, meteoRain_number: 0, meteoCloud_number: 0, meteoSnow: 0 }) {
+function convertMeteoToAsset(option = { isDay_bool: null, meteoRain_number: null, meteoCloud_number: null, meteoSnow: null, meteoDailyCloud: null }) {
 
     let imgSrc = "";
     let { isDay_bool, meteoRain_number, meteoCloud_number, meteoSnow } = option;
 
     if (meteoRain_number > 1) {
         imgSrc = "images/douche.png";
-    } else if (meteoCloud_number > 20 && meteoCloud_number < 50 && isDay_bool === 1) {
+    } else if (meteoCloud_number > 20 && meteoCloud_number < 50 && (isDay_bool === 1 || isDay_bool === null)) {
         imgSrc = "images/nuage.png";
-    } else if (meteoCloud_number > 20 && meteoCloud_number < 50 && isDay_bool === 0) {
+    } else if (meteoCloud_number > 20 && meteoCloud_number < 50 && (isDay_bool === 1 || isDay_bool === null)) {
         imgSrc = "images/night.png"
     } else if (meteoCloud_number > 50) {
         imgSrc = "images/nuage(1).png";
@@ -155,6 +208,12 @@ function convertInfoToConst(meteo, type) {
     const meteoSnow = meteo[type].snowfall;
     const meteoCloud = meteo[type].cloud_cover;
     const isDay = meteo[type].is_day;
+    const meteoWind = meteo[type].wind_speed_10m;
+    const meteoMaxTemp = meteo[type].temperature_2m_max;
+    const meteoMinTemp = meteo[type].temperature_2m_min;
+    const meteoDailyCloud = meteo.daily.cloud_cover_mean;
+    const meteoDailyRain = meteo.daily.rain_sum;
+    const meteoDailysnow = meteo.daily.snowfall_sum;
 
     return {
         meteoHour,
@@ -164,6 +223,12 @@ function convertInfoToConst(meteo, type) {
         meteoRain,
         meteoSnow,
         meteoCloud,
-        isDay
+        isDay,
+        meteoWind,
+        meteoMaxTemp,
+        meteoMinTemp,
+        meteoDailyCloud,
+        meteoDailyRain,
+        meteoDailysnow
     };
 }

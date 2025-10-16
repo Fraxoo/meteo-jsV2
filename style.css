@@ -16,18 +16,25 @@ h2{
 body {
     background-color: #0d192a;
     height: 100vh;
+    margin: 1rem;
 }
 
 p {
     color: #b7bcc4;
 }
 
+main{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
 .search-bar {
     background-color: #1c2939;
     color: #b7bcc4;
-    margin: 2rem 1rem;
+    margin: 2rem 0rem;
     padding: 0.5rem;
-    border-radius: 5rem;
+    border-radius: 1rem;
     display: flex;
     gap: 0.5rem;
 }
@@ -51,9 +58,9 @@ p {
 .main-top{
     display: flex;
     justify-content: space-between;
-    margin: 1rem;
     gap: 1rem;
     align-items: center;
+    margin: 1rem 0;
 }
 
 .main-top img{
@@ -78,10 +85,9 @@ p {
 
 .forecast-mid{
     display: flex;
-    margin: 0 1rem;
     overflow-x: auto;
-    gap: 1rem;
-    background-color: #172537;
+    gap: 2rem;
+    background-color: #1c2939;
     padding: 1rem;
    
     border-radius: 1rem;
@@ -100,4 +106,86 @@ p {
 
 .forecast-mid h3 {
     color: white;
+}
+
+.mid-info{
+    background-color: #1c2939;
+    display: flex;
+    justify-content: space-around;
+    border-radius: 1rem;
+    padding: 1rem 0;
+    align-items: center;
+}
+
+.mid-info-div{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.wind{
+    margin-right: 1rem;
+}
+
+.mid-info-div h3 {
+    color: white;
+}
+
+.flex{
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    color: #b7bcc4;
+    font-size: 1.2rem;
+}
+
+.bottom-main{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background-color: #1c2939;
+    padding: 1rem;
+    border-radius: 1rem;
+}
+
+.bottom-main h3 {
+    font-size: 1rem;
+}
+
+.bottom-main img{
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.bottom-main-info{
+    display: flex;
+    flex: 4;
+    gap: 2rem;
+    align-items: center;
+}
+
+.bottom-main-info-day{
+    display: flex;
+    flex: 3;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+}
+
+.bottom-main-info-temp{
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: end;
+    justify-content: space-between;
+    font-size: 1rem;
+
+}
+
+.bottom-main-info-temp h3{
+    color: white;
+}
+
+.bottom-main-info-temp p{
+    opacity: 0.8;
 }
