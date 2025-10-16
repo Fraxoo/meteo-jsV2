@@ -31,9 +31,6 @@ async function main() {
             const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${town}&count=1&language=fr&format=json`).then(response => response.json());
 
             if (response.results.length > 0) {
-                const forecastMidDiv = document.querySelector(".bottom-main-info").innerHTML = "";
-                const bottomMainDiv = document.querySelector("#forecast-mid-info").innerHTML = "";
-                
 
                 const latitude = response.results[0].latitude;
                 const longitude = response.results[0].longitude;
@@ -76,6 +73,9 @@ async function main() {
     const searchBar = document.querySelector("#search-bar");
 
     searchBar.addEventListener("submit", (event) => {
+
+        const erase = document.querySelector(".bottom-main").innerHTML = "";
+
         event.preventDefault();
         const formData = new FormData(searchBar);
 
