@@ -1,5 +1,11 @@
 async function main() {
 
+    /**
+     * 
+     * @param { number } longitude 
+     * @param { number } latitude 
+     * @returns 
+     */
     async function getWeather(longitude, latitude) {
         try {
             const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,weather_code,sunrise,sunset,daylight_duration,rain_sum,snowfall_sum,wind_speed_10m_max,precipitation_probability_max,cloud_cover_mean,cloud_cover_max&hourly=temperature_2m,is_day,rain,snowfall,apparent_temperature,precipitation_probability,cloud_cover&current=temperature_2m,rain,is_day,apparent_temperature,snowfall,cloud_cover,wind_speed_10m&timezone=Europe%2FLondon&forecast_hours=24`)
@@ -15,11 +21,30 @@ async function main() {
         }
     }
 
-    async function getCoordsByTown(town) {
-        try {
-            const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${town}&count=10&language=en&format=json`);
 
-            return res.json();
+    /**
+     * 
+     * @param { string } town 
+     */
+    async function getWeatherByTown(town) {
+        try {
+            const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${town}&count=1&language=fr&format=json`).then(response => response.json());
+
+            if (response.results.length > 0) {
+                const forecastMidDiv = document.querySelector(".bottom-main-info").innerHTML = "";
+                const bottomMainDiv = document.querySelector("#forecast-mid-info").innerHTML = "";
+                
+
+                const latitude = response.results[0].latitude;
+                const longitude = response.results[0].longitude;
+                const meteo = await getWeather(longitude, latitude);
+
+                showHourlyMeteo(meteo.meteo);
+                showCurrentMeteo(meteo.meteo, meteo.town)
+                showDailyMeteo(meteo.meteo);
+            } else {
+
+            }
 
         } catch (error) {
             console.error(error);
@@ -27,24 +52,41 @@ async function main() {
     }
 
 
+
     if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(async (position) => {
-            const meteo = await getWeather(position.coords.longitude, position.coords.latitude);
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const meteo = await getWeather(position.coords.longitude, position.coords.latitude);
 
-            console.log(meteo);
+                console.log(meteo);
+
+                showHourlyMeteo(meteo.meteo);
+                showCurrentMeteo(meteo.meteo, meteo.town);
+                showDailyMeteo(meteo.meteo);
+            },
+            async (error) => {
+                console.warn("Géolocalisation refusée :", error.message);
+                getWeatherByTown("Paris");
+            }
+        );
+    } else { // Si l’API n’existe pas du tout
+        getWeatherByTown("Paris");
+    }
+
+    const searchBar = document.querySelector("#search-bar");
+
+    searchBar.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const formData = new FormData(searchBar);
+
+        const town = formData.get("search");
+
+        getWeatherByTown(town);
 
 
-            showHourlyMeteo(meteo.meteo);
-            showCurrentMeteo(meteo.meteo, meteo.town)
-            showDailyMeteo(meteo.meteo);
-        })
-
-    } else {
+    })
 
 
-    } // ajouter ville par defaut (paris)
-    const coordsBytown = await getCoordsByTown("paris");
-    console.log(coordsBytown.results);
 
 }
 
@@ -65,10 +107,17 @@ function showDailyMeteo(meteo) {
         const clone = bottomMainTemplate.content.cloneNode(true);
         const dateString = weather.meteoHour[i];
         const date = new Date(dateString);
-        const day = date.toLocaleDateString("fr-FR", { weekday: "long" });
 
-        const day_elem = clone.querySelector(".day").textContent =
-            day.charAt(0).toUpperCase() + day.slice(1);
+        const day = date.toLocaleDateString("fr-FR", { weekday: "long" });
+        if (day[i] === day[0]) {
+            const day_elem = clone.querySelector(".day").textContent = "Aujourd'hui";
+        } else {
+            const day_elem = clone.querySelector(".day").textContent =
+                day.charAt(0).toUpperCase() + day.slice(1);
+
+        }
+
+
 
 
         const img = clone.querySelector("img").setAttribute("src", convertMeteoToAsset({
@@ -116,7 +165,6 @@ function showHourlyMeteo(meteo) {
 
         forecastMidDiv.appendChild(clone);
 
-
     }
 
 }
@@ -129,6 +177,7 @@ function showHourlyMeteo(meteo) {
  * @param {string} town 
  */
 function showCurrentMeteo(meteo, town) {
+
     const type = "current"
 
     const weather = convertInfoToConst(meteo, type);
