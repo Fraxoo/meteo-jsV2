@@ -22,7 +22,11 @@
 
         <form id="search-bar" method="get">
             <div class="search-bar">
-                <label for="search"><i class="fa-solid fa-magnifying-glass"></i></label>
+                <label for="search">
+                    <button type="submit" aria-label="Rechercher">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </label>
                 <input type="search" name="search" id="search" placeholder="Rechercher une ville">
             </div>
         </form>
@@ -43,7 +47,7 @@
         </div>
         <div class="forecast-mid">
 
-            
+
 
 
         </div>
@@ -67,7 +71,7 @@
 
 
 
-            
+
         </div>
 
     </main>
@@ -92,18 +96,15 @@
 </template>
 
 <template id="bottom-main">
-    <div id="erase">
-        <div class="bottom-main-info">
-            <div class="bottom-main-info-day">
-                <h3 class="day">jour</h3>
-                <img>
-            </div>
-            <div class="bottom-main-info-temp">
-                <h3>temp</h3>
-                <p>/</p>
-                <p class="min-temp">temp</p>
-            </div>
+    <div class="bottom-main-info">
+        <div class="bottom-main-info-day">
+            <h3 class="day">jour</h3>
+            <img>
         </div>
-
+        <div class="bottom-main-info-temp">
+            <h3>temp</h3>
+            <p>/</p>
+            <p class="min-temp">temp</p>
+        </div>
     </div>
 </template>

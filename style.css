@@ -43,6 +43,13 @@ main{
     margin: 0.5rem;
 }
 
+.search-bar button{
+    background: none;
+    border: none;
+    color: #b7bcc4;
+    cursor: pointer;
+}
+
 #search{
     background-color: #1c2939;
     color: #b7bcc4;
@@ -176,8 +183,8 @@ main{
     display: flex;
     flex: 1;
     align-items: center;
-    justify-content: end;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 0.5rem;
     font-size: 1rem;
 
 }
@@ -188,4 +195,8 @@ main{
 
 .bottom-main-info-temp p{
     opacity: 0.8;
+}
+
+@media screen {
+    
 }

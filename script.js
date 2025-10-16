@@ -70,13 +70,23 @@ async function main() {
         getWeatherByTown("Paris");
     }
 
+    window.addEventListener("load", () => {
+        const searchInput = document.querySelector("#search");
+        if (searchInput) {
+            searchInput.value = ""; 
+        }
+    });
+
+
     const searchBar = document.querySelector("#search-bar");
 
+
     searchBar.addEventListener("submit", (event) => {
-
-        const erase = document.querySelector(".bottom-main").innerHTML = "";
-
         event.preventDefault();
+
+        const erase1 = document.querySelector(".bottom-main").innerHTML = "";
+        const erase2 = document.querySelector(".forecast-mid").innerHTML = "";
+
         const formData = new FormData(searchBar);
 
         const town = formData.get("search");
