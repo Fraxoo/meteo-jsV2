@@ -9,7 +9,7 @@ async function main() {
     async function getWeather(longitude, latitude) {
         try {
             const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,weather_code,sunrise,sunset,daylight_duration,rain_sum,snowfall_sum,wind_speed_10m_max,precipitation_probability_max,cloud_cover_mean,cloud_cover_max&hourly=temperature_2m,is_day,rain,snowfall,apparent_temperature,precipitation_probability,cloud_cover&current=temperature_2m,rain,is_day,apparent_temperature,snowfall,cloud_cover,wind_speed_10m&timezone=Europe%2FLondon&forecast_hours=24`)
-            const respons = await fetch(`http://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`);
+            const respons = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`);
 
 
             const meteo = await res.json();
