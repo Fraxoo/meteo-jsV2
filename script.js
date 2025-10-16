@@ -30,6 +30,9 @@ async function main() {
         try {
             const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${town}&count=1&language=fr&format=json`).then(response => response.json());
 
+            console.log(response);
+            
+
             if (response.results.length > 0) {
 
                 const latitude = response.results[0].latitude;
@@ -37,7 +40,7 @@ async function main() {
                 const meteo = await getWeather(longitude, latitude);
 
                 showHourlyMeteo(meteo.meteo);
-                showCurrentMeteo(meteo.meteo, meteo.town)
+                showCurrentMeteo(meteo.meteo, response.results[0].name)
                 showDailyMeteo(meteo.meteo);
             } else {
 
@@ -56,9 +59,10 @@ async function main() {
                 const meteo = await getWeather(position.coords.longitude, position.coords.latitude);
 
                 console.log(meteo);
+                
 
                 showHourlyMeteo(meteo.meteo);
-                showCurrentMeteo(meteo.meteo, meteo.town);
+                showCurrentMeteo(meteo.meteo, meteo.town.address.city);
                 showDailyMeteo(meteo.meteo);
             },
             async (error) => {
@@ -108,8 +112,6 @@ function showDailyMeteo(meteo) {
     const type = "daily"
     const weather = convertInfoToConst(meteo, type);
     const bottomMainDiv = document.querySelector(".bottom-main");
-    // const jour = date.toLocaleDateString("fr-FR", { weekday: "long" });
-    // console.log(jour); // "mardi"
 
 
     for (let i = 0; i < meteo.daily.time.length; i++) {
@@ -193,7 +195,7 @@ function showCurrentMeteo(meteo, town) {
     const weather = convertInfoToConst(meteo, type);
 
     const mainTop = document.querySelector(".main-top")
-    const topH1 = mainTop.querySelector("h1").textContent = town.address.city;
+    const topH1 = mainTop.querySelector("h1").textContent = town;
 
     const rainChances = mainTop.querySelector("p").textContent = `Chance de pluie: ${meteo.daily.precipitation_probability_max[0]}%`;
 
@@ -206,7 +208,7 @@ function showCurrentMeteo(meteo, town) {
         "meteoSnow": weather.meteoSnow
     }));
 
-    console.log(weather);
+
 
 
     const midInfo = document.querySelector(".mid-info");
