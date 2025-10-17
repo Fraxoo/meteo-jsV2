@@ -200,6 +200,14 @@ p {
 
 }
 
+.error{
+    color: red;
+}
+
+.hidden{
+    display: none;
+}
+
 .desktop {
     display: hidden;
 }
