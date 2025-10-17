@@ -166,14 +166,14 @@ main{
 
 .bottom-main-info{
     display: flex;
-    flex: 4;
-    gap: 2rem;
+    flex: 3;
+    gap: 1rem;
     align-items: center;
 }
 
 .bottom-main-info-day{
     display: flex;
-    flex: 3;
+    flex: 2;
     justify-content: space-between;
     align-items: center;
     color: white;
