@@ -245,6 +245,14 @@ p {
         height: 100%;
     }
 
+    .main-top{
+        justify-content: space-between;
+    }
+
+    .main-top img{
+        width: 25%;
+    }
+
     .bottom-main {
         padding: 1rem 2rem;
     }
