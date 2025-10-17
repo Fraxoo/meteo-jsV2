@@ -11,13 +11,20 @@ async function main() {
             const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,weather_code,sunrise,sunset,daylight_duration,rain_sum,snowfall_sum,wind_speed_10m_max,precipitation_probability_max,cloud_cover_mean,cloud_cover_max&hourly=temperature_2m,is_day,rain,snowfall,apparent_temperature,precipitation_probability,cloud_cover&current=temperature_2m,rain,is_day,apparent_temperature,snowfall,cloud_cover,wind_speed_10m&timezone=Europe%2FLondon&forecast_hours=24`)
             const respons = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`); //si marhc eplus retire s http
 
+            if (!res.ok) {
+                throw new Error("Erreur réseau : " + res.status);
+            }
+            if (!respons.ok) {
+                throw new Error("Erreur réseau : " + respons.status);
+            }
 
             const meteo = await res.json();
             const town = await respons.json();
 
             return { meteo, town };
         } catch (error) {
-            console.error(error);
+            ErrorSearch();
+            throw error;
         }
     }
 
@@ -27,29 +34,30 @@ async function main() {
      * @param { string } town 
      */
     async function getWeatherByTown(town) {
+        ErrorAddClass();
         try {
-            const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${town}&count=1&language=fr&format=json`).then(response => response.json());
+            const response = await fetch(
+                `https://geocoding-api.open-meteo.com/v1/search?name=${town}&count=1&language=fr&format=json`
+            );
 
-            console.log(response);
-
-
-            if (response.results.length > 0) {
-
-                const latitude = response.results[0].latitude;
-                const longitude = response.results[0].longitude;
-                const meteo = await getWeather(longitude, latitude);
-
-                showHourlyMeteo(meteo.meteo);
-                showCurrentMeteo(meteo.meteo, response.results[0].name)
-                showDailyMeteo(meteo.meteo);
-            } else {
-
+            if (!response.ok) {
+                throw new Error("Erreur réseau : " + response.status);
             }
 
+            const data = await response.json();
+
+            if (data.results && data.results.length > 0) {
+                const { latitude, longitude, name } = data.results[0];
+                const meteo = await getWeather(longitude, latitude);
+                showMeteo(meteo.meteo, name);
+            } else {
+                ErrorNotFound();
+            }
         } catch (error) {
-            console.error(error);
+            ErrorSearch();
         }
     }
+
 
 
 
@@ -58,12 +66,7 @@ async function main() {
             async (position) => {
                 const meteo = await getWeather(position.coords.longitude, position.coords.latitude);
 
-                console.log(meteo);
-
-
-                showHourlyMeteo(meteo.meteo);
-                showCurrentMeteo(meteo.meteo, meteo.town.address.municipality);
-                showDailyMeteo(meteo.meteo);
+                showMeteo(meteo.meteo, meteo.town.address.municipality)
             },
             async (error) => {
                 console.warn("Géolocalisation refusée :", error.message);
@@ -81,9 +84,7 @@ async function main() {
         }
     });
 
-
     const searchBar = document.querySelector("#search-bar");
-
 
     searchBar.addEventListener("submit", (event) => {
         event.preventDefault();
@@ -96,8 +97,6 @@ async function main() {
         const town = formData.get("search");
 
         getWeatherByTown(town);
-
-
     })
 
 
@@ -106,13 +105,44 @@ async function main() {
 
 main();
 
+function ErrorAddClass() {
+    const errorElement = document.querySelector(".error");
+    errorElement.classList.add("hidden");
+    errorElement.textContent = "";
+}
+
+function ErrorSearch() {
+    const errorElement = document.querySelector(".error");
+    errorElement.textContent = "Erreur lors de la recherche.";
+    errorElement.classList.remove("hidden");
+}
+
+function ErrorNotFound() {
+    const errorElement = document.querySelector(".error");
+    errorElement.textContent = "Ville introuvable.";
+    errorElement.classList.remove("hidden");
+}
+
+/**
+ * 
+ * @param {object} meteo 
+ * @param {string} town 
+ */
+function showMeteo(meteo, town) {
+    showCurrentMeteo(meteo, town);
+    showDailyMeteo(meteo);
+    showHourlyMeteo(meteo);
+}
 
 
+/**
+ * 
+ * @param {object} meteo 
+ */
 function showDailyMeteo(meteo) {
     const type = "daily"
     const weather = convertInfoToConst(meteo, type);
     const bottomMainDiv = document.querySelector(".bottom-main");
-
 
     for (let i = 0; i < meteo.daily.time.length; i++) {
         const bottomMainTemplate = document.querySelector("#bottom-main");
@@ -126,11 +156,7 @@ function showDailyMeteo(meteo) {
         } else {
             const day_elem = clone.querySelector(".day").textContent =
                 day.charAt(0).toUpperCase() + day.slice(1);
-
         }
-
-
-
 
         const img = clone.querySelector("img").setAttribute("src", convertMeteoToAsset({
             isDay_bool: 1,
@@ -176,9 +202,7 @@ function showHourlyMeteo(meteo) {
         }))
 
         forecastMidDiv.appendChild(clone);
-
     }
-
 }
 
 
@@ -194,7 +218,8 @@ function showCurrentMeteo(meteo, town) {
 
     const weather = convertInfoToConst(meteo, type);
 
-    const mainTop = document.querySelector(".main-top")
+    const mainTop = document.querySelector(".main-top");
+
     const topH1 = mainTop.querySelector("h1").textContent = town;
 
     const rainChances = mainTop.querySelector("p").textContent = `Chance de pluie: ${meteo.daily.precipitation_probability_max[0]}%`;
@@ -207,9 +232,6 @@ function showCurrentMeteo(meteo, town) {
         "meteoRain_number": weather.meteoRain,
         "meteoSnow": weather.meteoSnow
     }));
-
-
-
 
     const midInfo = document.querySelector(".mid-info");
 
